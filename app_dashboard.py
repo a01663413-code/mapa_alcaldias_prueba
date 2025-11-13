@@ -184,6 +184,8 @@ with col7:
 with col8:
     st.markdown("##### Gráfico 4/5: Proporción Violenta (Polar)")
     chart_polar = plot_utils.plot_polar_violencia_hora(data_completo)
+    ("##### Gráfico 4/5: Proporción Violenta (Polar)")
+    chart_polar = plot_utils.plot_polar_violencia_hora(df_filtrado)
     st.altair_chart(chart_polar, use_container_width=True)
     
 # --- Fila 6: Dataframe (Opcional) ---
