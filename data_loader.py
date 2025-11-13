@@ -293,6 +293,9 @@ def process_hour_crimes_data(df):
     """Procesa el archivo hour_crimes_cleaned.csv que ya tiene CATEGORIA"""
     df = df.copy()
     
+    # Debug: mostrar columnas antes del renombrado
+    st.info(f"Columnas antes del renombrado: {df.columns.tolist()[:10]}...")
+    
     # Renombrar columnas con sufijo _N a nombres sin sufijo
     rename_map = {
         'latitud_N': 'latitud',
@@ -307,6 +310,9 @@ def process_hour_crimes_data(df):
     for old_col, new_col in rename_map.items():
         if old_col in df.columns:
             df = df.rename(columns={old_col: new_col})
+    
+    # Debug: mostrar columnas después del renombrado
+    st.info(f"Columnas después del renombrado: {df.columns.tolist()[:10]}...")
     
     # Asegurar tipos de dato
     if 'hora_hecho_h' in df.columns:
