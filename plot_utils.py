@@ -91,6 +91,10 @@ def plot_heatmap_dia_hora(data):
     if 'dia_semana' not in data_heatmap.columns or 'CATEGORIA' not in data_heatmap.columns:
         return alt.Chart(pd.DataFrame()).mark_text(text="Faltan columnas necesarias").encode()
     
+    # Convertir dia_semana a string si es categórico para evitar problemas con fillna
+    if pd.api.types.is_categorical_dtype(data_heatmap['dia_semana']):
+        data_heatmap['dia_semana'] = data_heatmap['dia_semana'].astype(str)
+    
     # Total de delitos por día y hora
     total_delitos = data_heatmap.groupby(['dia_semana', 'hora_hecho_h']).size().reset_index(name='Total')
     
@@ -98,7 +102,8 @@ def plot_heatmap_dia_hora(data):
     violentos = data_heatmap[data_heatmap['CATEGORIA'] != 'No violentos'].groupby(['dia_semana', 'hora_hecho_h']).size().reset_index(name='Violentos')
     
     # Merge y calcular porcentaje
-    df_plot = total_delitos.merge(violentos, on=['dia_semana', 'hora_hecho_h'], how='left').fillna(0)
+    df_plot = total_delitos.merge(violentos, on=['dia_semana', 'hora_hecho_h'], how='left')
+    df_plot['Violentos'] = df_plot['Violentos'].fillna(0)
     df_plot['Porcentaje_Violentos'] = (df_plot['Violentos'] / df_plot['Total']).fillna(0)
     
     # Crear un grid completo para que Altair muestre 0s
@@ -106,7 +111,10 @@ def plot_heatmap_dia_hora(data):
     all_days = pd.DataFrame({'dia_semana': dias_ordenados})
     grid = all_days.merge(all_hours, how='cross')
     
-    df_plot = grid.merge(df_plot, on=['dia_semana', 'hora_hecho_h'], how='left').fillna(0)
+    df_plot = grid.merge(df_plot, on=['dia_semana', 'hora_hecho_h'], how='left')
+    df_plot['Total'] = df_plot['Total'].fillna(0)
+    df_plot['Violentos'] = df_plot['Violentos'].fillna(0)
+    df_plot['Porcentaje_Violentos'] = df_plot['Porcentaje_Violentos'].fillna(0)
 
     heatmap = alt.Chart(df_plot).mark_rect().encode(
         x=alt.X('hora_hecho_h:O', title='Hora del Día', axis=alt.Axis(labels=True, ticks=True)),

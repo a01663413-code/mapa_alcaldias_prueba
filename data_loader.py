@@ -334,7 +334,7 @@ def load_data(path="df_streamlit.csv"):
     """
     try:
         st.info(f"Cargando dataset local ({path})...")
-        data = pd.read_csv(path)
+        data = pd.read_csv(path, low_memory=False)  # Evita el DtypeWarning
         st.success(f"Datos locales cargados: {len(data)} registros.")
     except Exception as e:
         st.error(f"Error al cargar el dataset local: {e}")
@@ -351,8 +351,13 @@ def load_data(path="df_streamlit.csv"):
             st.info("Aplicando procesamiento DUMMY...")
             data_limpio = process_dummy_data(data)
         
-        data_limpio = data_limpio.dropna(subset=["latitud", "longitud"])
-        st.success(f"Procesamiento finalizado. {len(data_limpio)} registros válidos.")
+        # Verificar que las columnas existan antes de dropna
+        if 'latitud' in data_limpio.columns and 'longitud' in data_limpio.columns:
+            data_limpio = data_limpio.dropna(subset=["latitud", "longitud"])
+            st.success(f"Procesamiento finalizado. {len(data_limpio)} registros válidos.")
+        else:
+            st.warning(f"Columnas disponibles: {data_limpio.columns.tolist()}")
+            st.success(f"Procesamiento finalizado. {len(data_limpio)} registros.")
     else:
         data_limpio = pd.DataFrame()
     
