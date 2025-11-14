@@ -59,7 +59,7 @@ def _normalize_text_series(s):
         s.astype(str)
         .apply(_strip_accents_upper)
         .str.strip()
-        .str.replace(r"\s+", " ", regex=True)
+        .str.replace(r"\\s+", " ", regex=True)
     )
 
 def categorizar(df):
