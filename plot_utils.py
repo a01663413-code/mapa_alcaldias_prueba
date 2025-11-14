@@ -35,10 +35,18 @@ def plot_delitos_por_alcaldia(data):
 
 def plot_proporcion_violencia(data):
     """Gráfica de dona: Proporción de delitos violentos vs. no violentos."""
-    if data.empty or 'Violento' not in data.columns:
+    if data.empty or 'CATEGORIA' not in data.columns:
         return alt.Chart(pd.DataFrame()).mark_text(text="No hay datos").encode()
 
-    df_plot = data['Violento'].value_counts(normalize=True).reset_index()
+    # Crear columna binaria basada en CATEGORIA (normalizada)
+    data_temp = data.copy()
+    data_temp['Violento'] = np.where(
+        data_temp['CATEGORIA'].astype(str).str.upper() == 'NO VIOLENTOS',
+        'No Violento',
+        'Violento'
+    )
+    
+    df_plot = data_temp['Violento'].value_counts(normalize=True).reset_index()
     df_plot.columns = ['Categoría', 'Porcentaje']
     df_plot['Porcentaje_fmt'] = (df_plot['Porcentaje'] * 100).round(1)
 
@@ -98,8 +106,10 @@ def plot_heatmap_dia_hora(data):
     # Total de delitos por día y hora
     total_delitos = data_heatmap.groupby(['dia_semana', 'hora_hecho_h']).size().reset_index(name='Total')
     
-    # Delitos violentos por día y hora
-    violentos = data_heatmap[data_heatmap['CATEGORIA'] != 'No violentos'].groupby(['dia_semana', 'hora_hecho_h']).size().reset_index(name='Violentos')
+    # Delitos violentos por día y hora (normalizar CATEGORIA)
+    violentos = data_heatmap[
+        data_heatmap['CATEGORIA'].astype(str).str.upper().ne('NO VIOLENTOS')
+    ].groupby(['dia_semana', 'hora_hecho_h']).size().reset_index(name='Violentos')
     
     # Merge y calcular porcentaje
     df_plot = total_delitos.merge(violentos, on=['dia_semana', 'hora_hecho_h'], how='left')
@@ -143,41 +153,57 @@ def plot_crimenes_violentos_por_hora(data):
         return alt.Chart(pd.DataFrame()).mark_text(text="No hay datos").encode()
 
     # Filtrar solo horas válidas y categorías violentas
+    # Normalizar la columna CATEGORIA para evitar problemas con mayúsculas/acentos
     df_plot = data[
         (data['hora_hecho_h'].between(0, 23)) &
-        (data['CATEGORIA'] != 'No violentos')
+        (data['CATEGORIA'].astype(str).str.upper().ne('NO VIOLENTOS'))
     ].copy()
 
     # AGREGACIÓN: Agrupar los datos antes de enviar a Altair
     df_aggregated = df_plot.groupby(['hora_hecho_h', 'CATEGORIA']).size().reset_index(name='Total')
     
-    # Definir orden de categorías para apilar
+    # Definir orden de categorías para apilar (Robo debe ser el más grande)
     category_order = df_aggregated.groupby('CATEGORIA')['Total'].sum().sort_values(ascending=False).index.tolist()
     
-    # Colores: Asignar colores de PALETA_PRINCIPAL a las categorías
-    color_scale = alt.Scale(domain=category_order, range=PALETA_PRINCIPAL)
+    # Mapeo de colores específico basado en la imagen de referencia
+    color_mapping = {
+        'Robo': '#98989A',           # Gris
+        'Otros': '#D0C9A3',          # Beige
+        'Lesiones': '#235B4E',       # Verde oscuro
+        'Homicidio/Feminicidio': '#9F2241',  # Rojo oscuro
+        'Secuestro': '#691C32'       # Guinda
+    }
     
-    # Gráfico base
-    base = alt.Chart(df_aggregated).encode(
-        x=alt.X('hora_hecho_h:O', title='Hora del Día', axis=alt.Axis(values=list(range(0, 24, 2)))),
+    # Crear escala de colores con dominio y rango explícitos
+    color_scale = alt.Scale(
+        domain=category_order,
+        range=[color_mapping.get(cat, '#98989A') for cat in category_order]
+    )
+    
+    # Barras apiladas (gráfico principal)
+    bars = alt.Chart(df_aggregated).mark_bar().encode(
+        x=alt.X('hora_hecho_h:O', 
+                title='Hora del Día', 
+                axis=alt.Axis(labelAngle=0)),
+        y=alt.Y('Total:Q', title='Número de Crímenes', stack='zero'),
+        color=alt.Color('CATEGORIA:N', 
+                       title='Categoría de crimen',
+                       scale=color_scale,
+                       legend=alt.Legend(
+                           orient='top-left',
+                           direction='vertical',
+                           titleFontSize=12,
+                           labelFontSize=11,
+                           symbolSize=100,
+                           padding=10
+                       )),
+        order=alt.Order('CATEGORIA', sort='descending'),
         tooltip=[
             alt.Tooltip('hora_hecho_h', title='Hora'),
-            alt.Tooltip('CATEGORIA', title='Categoría'),
+            alt.Tooltip('CATEGORIA', title='Categoría de crimen'),
             alt.Tooltip('Total:Q', title='Total', format=',')
         ]
     )
-    
-    # Barras apiladas
-    bars = base.mark_bar().encode(
-        y=alt.Y('Total:Q', title='Número de Crímenes', stack='zero'),
-        color=alt.Color('CATEGORIA', scale=color_scale),
-        order=alt.Order('CATEGORIA', sort='descending')
-    )
-    
-    # Bandas de noche y madrugada
-    bands = alt.Chart(pd.DataFrame({'start': [0, 20], 'stop': [6, 24]})).mark_rect(
-        color='grey', opacity=0.1
-    ).encode(x='start:Q', x2='stop:Q')
     
     # Etiqueta de la hora máxima
     totales = df_aggregated.groupby('hora_hecho_h')['Total'].sum().reset_index()
@@ -185,30 +211,67 @@ def plot_crimenes_violentos_por_hora(data):
         max_data = totales.loc[totales['Total'].idxmax()]
         
         max_text = alt.Chart(pd.DataFrame([max_data])).mark_text(
-            dy=-10, fontWeight='bold', color='black', fontSize=9
+            dy=-10, fontWeight='bold', color='black', fontSize=10
         ).encode(
             x=alt.X('hora_hecho_h:O'),
             y=alt.Y('Total:Q'),
-            text=alt.Text('Total:Q', format=',.0f')
+            text=alt.Text('Total:Q', format=',')
         )
         
-        return (bands + bars + max_text).properties(
-            title='Frecuencia de Crímenes Violentos por Hora'
-        ).interactive()
+        return (bars + max_text).properties(
+            title={
+                "text": "Frecuencia de Crímenes Violentos por Hora",
+                "fontSize": 16,
+                "fontWeight": "bold",
+                "anchor": "start"
+            },
+            width=700,
+            height=400
+        ).configure_view(
+            strokeWidth=0
+        ).configure_axis(
+            labelFontSize=11,
+            titleFontSize=12
+        ).configure_title(
+            anchor='start',
+            offset=20
+        )
     
     else:
         # Si no hay datos después de filtrar
-        return (bands + bars).properties(
-            title='Frecuencia de Crímenes Violentos por Hora'
-        ).interactive()
+        return bars.properties(
+            title={
+                "text": "Frecuencia de Crímenes Violentos por Hora",
+                "fontSize": 16,
+                "fontWeight": "bold",
+                "anchor": "start"
+            },
+            width=700,
+            height=400
+        ).configure_view(
+            strokeWidth=0
+        ).configure_axis(
+            labelFontSize=11,
+            titleFontSize=12
+        ).configure_title(
+            anchor='start',
+            offset=20
+        )
 
 
 def plot_volumen_total_violencia_hora(data):
     """Gráfico 2 (Notebook): Área apilada de Violentos vs No Violentos."""
-    if data.empty or 'Violento' not in data.columns:
+    if data.empty or 'CATEGORIA' not in data.columns:
         return alt.Chart(pd.DataFrame()).mark_text(text="No hay datos").encode()
 
-    df_plot = data[data['hora_hecho_h'].between(0, 23)]
+    df_plot = data[data['hora_hecho_h'].between(0, 23)].copy()
+    
+    # Crear columna binaria basada en CATEGORIA (normalizada)
+    df_plot['Violento'] = np.where(
+        df_plot['CATEGORIA'].astype(str).str.upper() == 'NO VIOLENTOS',
+        'No Violento',
+        'Violento'
+    )
 
     # Agrupar por hora y 'Violento'
     df_grouped = df_plot.groupby(['hora_hecho_h', 'Violento']).size().reset_index(name='Total')
@@ -259,7 +322,10 @@ def plot_ratio_violencia_hora(data):
     data_plot = data[data['hora_hecho_h'].between(0, 23)]
     
     totales = data_plot.groupby('hora_hecho_h').size().reindex(range(24), fill_value=0)
-    violentos = data_plot[data_plot['CATEGORIA'] != 'No violentos'].groupby('hora_hecho_h').size().reindex(range(24), fill_value=0)
+    # Normalizar CATEGORIA para evitar problemas con mayúsculas/acentos
+    violentos = data_plot[
+        data_plot['CATEGORIA'].astype(str).str.upper().ne('NO VIOLENTOS')
+    ].groupby('hora_hecho_h').size().reindex(range(24), fill_value=0)
     
     ratio = (violentos / totales.replace(0, np.nan)).fillna(0)
     ratio_smooth = ratio.rolling(window=3, center=True, min_periods=1).mean()
@@ -329,7 +395,10 @@ def plot_polar_violencia_hora(data):
     # --- Preprocesamiento ---
     data_plot = data[data['hora_hecho_h'].between(0, 23)]
     totales = data_plot.groupby('hora_hecho_h').size().reindex(range(24), fill_value=0)
-    violentos = data_plot[data_plot['CATEGORIA'] != 'No violentos'].groupby('hora_hecho_h').size().reindex(range(24), fill_value=0)
+    # Normalizar CATEGORIA para evitar problemas con mayúsculas/acentos
+    violentos = data_plot[
+        data_plot['CATEGORIA'].astype(str).str.upper().ne('NO VIOLENTOS')
+    ].groupby('hora_hecho_h').size().reindex(range(24), fill_value=0)
     ratio = (violentos / totales.replace(0, np.nan)).fillna(0)
 
     ratio_df = ratio.reset_index()

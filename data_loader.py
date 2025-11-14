@@ -244,9 +244,9 @@ def categorizar_dummy(df):
     # Las asignamos a "No violentos"
     df.loc[df["CATEGORIA"].isna(), "CATEGORIA"] = "No violentos"
     
-    # Crear la columna 'Violento' (necesaria para plot_utils)
+    # Crear la columna 'Violento' (necesaria para plot_utils) - con normalización
     df['Violento'] = np.where(
-        df['CATEGORIA'] == 'No violentos',
+        df['CATEGORIA'].astype(str).str.upper() == 'NO VIOLENTOS',
         'No Violento',
         'Violento'
     )
@@ -302,7 +302,6 @@ def process_hour_crimes_data(df):
         'longitud_N': 'longitud',
         'alcaldia_hecho_N': 'alcaldia_hecho',
         'delito_N': 'delito',
-        'hora_num': 'hora_hecho_h',
         'anio_hecho_N': 'anio_hecho',
         'mes_hecho_N': 'mes_hecho_num'
     }
@@ -314,19 +313,23 @@ def process_hour_crimes_data(df):
     # Debug: mostrar columnas después del renombrado
     st.info(f"Columnas después del renombrado: {df.columns.tolist()[:10]}...")
     
-    # Asegurar tipos de dato
-    if 'hora_hecho_h' in df.columns:
-        df['hora_hecho_h'] = pd.to_numeric(df['hora_hecho_h'], errors='coerce').fillna(-1).astype(int)
+    # Usar la columna 'hora' que ya existe en hour_crimes_cleaned.csv
+    # y renombrarla a 'hora_hecho_h' para compatibilidad con plot_utils
+    if 'hora' in df.columns:
+        df = df.rename(columns={'hora': 'hora_hecho_h'})
+        # Mantener los valores como están (pueden tener NaN)
+        # Las gráficas se encargarán de filtrar con .between(0, 23)
+        df['hora_hecho_h'] = pd.to_numeric(df['hora_hecho_h'], errors='coerce')
     
     # Asegurar que dia_semana esté en el formato correcto (con acentos)
     if 'dia_semana' in df.columns:
         dias_ordenados = ["LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO", "DOMINGO"]
         df['dia_semana'] = pd.Categorical(df['dia_semana'], categories=dias_ordenados, ordered=True)
     
-    # Crear columna 'Violento' si no existe
+    # Crear columna 'Violento' si no existe (usando normalización)
     if 'CATEGORIA' in df.columns and 'Violento' not in df.columns:
         df['Violento'] = np.where(
-            df['CATEGORIA'] == 'No violentos',
+            df['CATEGORIA'].astype(str).str.upper() == 'NO VIOLENTOS',
             'No Violento',
             'Violento'
         )
