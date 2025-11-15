@@ -133,12 +133,12 @@ with col1:
         show_points=("Puntos" in tipo_mapa),
         show_heatmap=("Heatmap" in tipo_mapa)
     )
-    st_folium(m, height=450, width="stretch") 
+    st_folium(m, height=450, use_container_width=True) 
 
 with col2:
     st.subheader("Delitos por Alcaldía")
     chart_alcaldia = plot_utils.plot_delitos_por_alcaldia(df_filtrado)
-    st.altair_chart(chart_alcaldia, width='stretch')
+    st.altair_chart(chart_alcaldia, use_container_width=True)
 
 st.markdown("---")
 st.subheader("Análisis de Incidentes (con filtros aplicados)")
@@ -149,12 +149,12 @@ col3, col4 = st.columns(2)
 with col3:
     st.markdown("##### Gráfico 2: Volumen Total y Fracción Violenta")
     chart2 = plot_utils.plot_volumen_total_violencia_hora(data_completo)
-    st.altair_chart(chart2, width='stretch')
+    st.altair_chart(chart2, use_container_width=True)
     
 with col4:
     st.markdown("##### Proporción de Violencia (General)")
     chart_donut = plot_utils.plot_proporcion_violencia(df_filtrado)
-    st.altair_chart(chart_donut, width='stretch')
+    st.altair_chart(chart_donut, use_container_width=True)
 
 st.markdown("---")
 
@@ -164,12 +164,12 @@ col5, col6 = st.columns(2)
 with col5:
     st.markdown("##### Gráfico 1: Frecuencia de Crímenes Violentos")
     chart1 = plot_utils.plot_crimenes_violentos_por_hora(data_completo)
-    st.altair_chart(chart1, width='stretch')
+    st.altair_chart(chart1, use_container_width=True)
     
 with col6:
     st.markdown("##### Gráfico 3: Porcentaje de Crímenes Violentos")
     chart3 = plot_utils.plot_ratio_violencia_hora(data_completo)
-    st.altair_chart(chart3, width='stretch')
+    st.altair_chart(chart3, use_container_width=True)
     
 st.markdown("---")
 
@@ -179,12 +179,12 @@ col7, col8 = st.columns(2)
 with col7:
     st.markdown("##### Heatmap de Incidencia (Día vs. Hora)")
     chart_heatmap = plot_utils.plot_heatmap_dia_hora(data_completo)
-    st.altair_chart(chart_heatmap, width='stretch')
+    st.altair_chart(chart_heatmap, use_container_width=True)
 
 with col8:
     st.markdown("##### Gráfico 4/5: Proporción Violenta (Polar)")
     chart_polar = plot_utils.plot_polar_violencia_hora(data_completo)
-    st.altair_chart(chart_polar, width='stretch')
+    st.altair_chart(chart_polar, use_container_width=True)
     
 # --- Fila 6: Dataframe (Opcional) ---
 if st.sidebar.checkbox("Mostrar datos crudos (filtrados)"):

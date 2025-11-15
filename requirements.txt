@@ -1,6 +1,9 @@
 # Adding streamlit folium package for community support
+streamlit>=1.28.0
 streamlit-folium==0.25.3
 geopandas==1.1.1
 pandas
+numpy
+altair
 folium
 requests
