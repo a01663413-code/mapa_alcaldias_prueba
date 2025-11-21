@@ -3,7 +3,7 @@
 # PÁGINA DE INICIO - DASHBOARD DELITOS CDMX
 # 
 # Ahora las páginas están en la carpeta /pages/:
-# - pages/1_Análisis_Inicial.py
+# - pages/1_Analisis_Inicial.py
 # - pages/2_Mapa.py
 # 
 # Usa el menú lateral para navegar entre páginas
