@@ -24,21 +24,29 @@ st.subheader("📊 Análisis Inicial")
 
 # === Filtro de Año ===
 st.sidebar.header("⚙️ Filtros")
-years_available = sorted(data_completo['anio_hecho_N'].dropna().unique().astype(int))
-selected_years = st.sidebar.multiselect(
-    "Selecciona Año(s):",
-    options=years_available,
-    default=years_available,
-    help="Selecciona uno o más años para filtrar los gráficos"
-)
 
-# Filtrar datos según año seleccionado
-if selected_years:
-    data_completo_filtered = data_completo[data_completo['anio_hecho_N'].isin(selected_years)]
-    st.markdown(f"**Años seleccionados:** {', '.join(map(str, selected_years))}")
+# Check which column name exists (anio_hecho or anio_hecho_N)
+year_col = 'anio_hecho' if 'anio_hecho' in data_completo.columns else 'anio_hecho_N'
+
+if year_col in data_completo.columns:
+    years_available = sorted(data_completo[year_col].dropna().unique().astype(int))
+    selected_years = st.sidebar.multiselect(
+        "Selecciona Año(s):",
+        options=years_available,
+        default=years_available,
+        help="Selecciona uno o más años para filtrar los gráficos"
+    )
+    
+    # Filtrar datos según año seleccionado
+    if selected_years:
+        data_completo_filtered = data_completo[data_completo[year_col].isin(selected_years)]
+        st.markdown(f"**Años seleccionados:** {', '.join(map(str, selected_years))}")
+    else:
+        data_completo_filtered = data_completo
+        st.markdown("**Mostrando todos los años**")
 else:
+    st.warning(f"Columna de año no encontrada. Columnas disponibles: {data_completo.columns.tolist()[:10]}")
     data_completo_filtered = data_completo
-    st.markdown("**Mostrando todos los años**")
 
 # --- Fila 1: Gráficas (2 Columnas) ---
 col3, col4 = st.columns(2)
