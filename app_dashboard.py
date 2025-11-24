@@ -35,7 +35,7 @@ delegaciones = map_utils.load_geojson(URL_GEOJSON_ALCALDIAS, local_backup="limit
 data = data_loader.load_data("df_streamlit.csv") 
 
 # Cargar datos completos para gráficos 2 y 3
-data_completo = data_loader.load_data("hour_crimes_cleaned.csv")
+data_completo = data_loader.load_data("hour_crimes_optimized.csv")
 
 if data.empty:
     st.error("No se pudieron cargar los datos dummy. El dashboard no puede continuar.")

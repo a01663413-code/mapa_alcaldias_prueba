@@ -87,7 +87,7 @@ def plot_heatmap_dia_hora(data):
     if 'dia_semana' in data_heatmap.columns:
         sample_dias = data_heatmap['dia_semana'].dropna().unique()
         if any('Á' in str(d) or 'É' in str(d) for d in sample_dias):
-            # Con acentos (hour_crimes_cleaned.csv)
+            # Con acentos (hour_crimes_optimized.csv)
             dias_ordenados = ["LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO", "DOMINGO"]
         else:
             # Sin acentos (df_streamlit.csv)
