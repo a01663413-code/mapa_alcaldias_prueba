@@ -290,8 +290,10 @@ def process_dummy_data(df):
 
 # --- Función principal de carga (Activa) ---
 def process_hour_crimes_data(df):
-    """Procesa el archivo hour_crimes_cleaned.csv que ya tiene CATEGORIA"""
-    df = df.copy()
+    """Procesa el archivo hour_crimes_cleaned.csv que ya tiene CATEGORIA
+    Optimizado para reducir uso de memoria."""
+    
+    # No hacer copia si no es necesario - trabajar in-place cuando sea posible
     
     # Debug: mostrar columnas antes del renombrado
     st.info(f"Columnas antes del renombrado: {df.columns.tolist()[:10]}...")
@@ -306,9 +308,7 @@ def process_hour_crimes_data(df):
         'mes_hecho_N': 'mes_hecho_num'
     }
     
-    for old_col, new_col in rename_map.items():
-        if old_col in df.columns:
-            df = df.rename(columns={old_col: new_col})
+    df.rename(columns=rename_map, inplace=True)
     
     # Debug: mostrar columnas después del renombrado
     st.info(f"Columnas después del renombrado: {df.columns.tolist()[:10]}...")
@@ -316,9 +316,8 @@ def process_hour_crimes_data(df):
     # Usar la columna 'hora' que ya existe en hour_crimes_cleaned.csv
     # y renombrarla a 'hora_hecho_h' para compatibilidad con plot_utils
     if 'hora' in df.columns:
-        df = df.rename(columns={'hora': 'hora_hecho_h'})
-        # Mantener los valores como están (pueden tener NaN)
-        # Las gráficas se encargarán de filtrar con .between(0, 23)
+        df.rename(columns={'hora': 'hora_hecho_h'}, inplace=True)
+        # Ya viene como float32 del load optimizado
         df['hora_hecho_h'] = pd.to_numeric(df['hora_hecho_h'], errors='coerce')
     
     # Asegurar que dia_semana esté en el formato correcto (con acentos)
@@ -333,6 +332,8 @@ def process_hour_crimes_data(df):
             'No Violento',
             'Violento'
         )
+        # Convertir a category para ahorrar memoria
+        df['Violento'] = df['Violento'].astype('category')
     
     return df
 
@@ -340,11 +341,38 @@ def process_hour_crimes_data(df):
 def load_data(path="df_streamlit.csv"):
     """
     Carga y procesa el dataset DUMMY 'df_streamlit.csv' o 'hour_crimes_cleaned.csv'.
+    Optimizado para reducir uso de memoria.
     """
     try:
         st.info(f"Cargando dataset local ({path})...")
-        data = pd.read_csv(path, low_memory=False)  # Evita el DtypeWarning
-        st.success(f"Datos locales cargados: {len(data)} registros.")
+        
+        # Para hour_crimes_cleaned.csv, solo cargar columnas necesarias
+        if path == "hour_crimes_cleaned.csv":
+            # Definir solo las columnas que realmente necesitamos
+            usecols = [
+                'latitud_N', 'longitud_N', 'alcaldia_hecho_N', 'delito_N',
+                'anio_hecho_N', 'mes_hecho_N', 'hora', 'dia_semana', 'CATEGORIA'
+            ]
+            
+            # Definir tipos de datos para reducir memoria
+            dtype = {
+                'alcaldia_hecho_N': 'category',
+                'delito_N': 'category',
+                'dia_semana': 'category',
+                'CATEGORIA': 'category',
+                'anio_hecho_N': 'int16',
+                'mes_hecho_N': 'int8',
+                'hora': 'float32',
+                'latitud_N': 'float32',
+                'longitud_N': 'float32'
+            }
+            
+            data = pd.read_csv(path, usecols=usecols, dtype=dtype, low_memory=False)
+            st.success(f"Datos locales cargados (optimizado): {len(data)} registros.")
+        else:
+            data = pd.read_csv(path, low_memory=False)
+            st.success(f"Datos locales cargados: {len(data)} registros.")
+            
     except Exception as e:
         st.error(f"Error al cargar el dataset local: {e}")
         return pd.DataFrame()
