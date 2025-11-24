@@ -290,7 +290,7 @@ def process_dummy_data(df):
 
 # --- Función principal de carga (Activa) ---
 def process_hour_crimes_data(df):
-    """Procesa el archivo hour_crimes_cleaned.csv que ya tiene CATEGORIA
+    """Procesa el archivo hour_crimes_optimized.csv que ya tiene CATEGORIA
     Optimizado para reducir uso de memoria."""
     
     # No hacer copia si no es necesario - trabajar in-place cuando sea posible
@@ -313,7 +313,7 @@ def process_hour_crimes_data(df):
     # Debug: mostrar columnas después del renombrado
     st.info(f"Columnas después del renombrado: {df.columns.tolist()[:10]}...")
     
-    # Usar la columna 'hora' que ya existe en hour_crimes_cleaned.csv
+    # Usar la columna 'hora' que ya existe en hour_crimes_optimized.csv
     # y renombrarla a 'hora_hecho_h' para compatibilidad con plot_utils
     if 'hora' in df.columns:
         df.rename(columns={'hora': 'hora_hecho_h'}, inplace=True)
@@ -340,14 +340,14 @@ def process_hour_crimes_data(df):
 @st.cache_data
 def load_data(path="df_streamlit.csv"):
     """
-    Carga y procesa el dataset DUMMY 'df_streamlit.csv' o 'hour_crimes_cleaned.csv'.
+    Carga y procesa el dataset DUMMY 'df_streamlit.csv' o 'hour_crimes_optimized.csv'.
     Optimizado para reducir uso de memoria.
     """
     try:
         st.info(f"Cargando dataset local ({path})...")
         
-        # Para hour_crimes_cleaned.csv, solo cargar columnas necesarias
-        if path == "hour_crimes_cleaned.csv":
+        # Para hour_crimes_optimized.csv, solo cargar columnas necesarias
+        if path == "hour_crimes_optimized.csv":
             # Definir solo las columnas que realmente necesitamos
             usecols = [
                 'latitud_N', 'longitud_N', 'alcaldia_hecho_N', 'delito_N',
@@ -380,8 +380,8 @@ def load_data(path="df_streamlit.csv"):
     if not data.empty:
         # Detectar qué archivo es por las columnas
         if 'latitud_N' in data.columns:
-            # Es hour_crimes_cleaned.csv
-            st.info("Procesando hour_crimes_cleaned.csv...")
+            # Es hour_crimes_optimized.csv
+            st.info("Procesando hour_crimes_optimized.csv...")
             data_limpio = process_hour_crimes_data(data)
         else:
             # Es df_streamlit.csv
