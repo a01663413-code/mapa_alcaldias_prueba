@@ -1,8 +1,5 @@
-# config.py
-# -----------------------------------------------------------------------------
 # ARCHIVO DE CONFIGURACIÓN CENTRAL
 # Almacena las paletas de colores oficiales (del notebook)
-# -----------------------------------------------------------------------------
 
 # Paleta Pantone colores del gobierno (para líneas y barras)
 PALETA_PRINCIPAL = [
