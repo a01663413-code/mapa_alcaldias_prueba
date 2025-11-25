@@ -110,10 +110,20 @@ def requiere_autenticacion(user_types: list = None):
 
 def mostrar_info_usuario_sidebar():
     """
-    Muestra información del usuario y botón de logout en el sidebar
+    Muestra información del usuario y botón de logout al final del sidebar
     """
+    # Usar un contenedor al final para el botón de cerrar sesión
+    # Esto asegura que siempre esté al final, después de los filtros
+    pass  # El contenido se agregará después de la navegación
+
+
+def renderizar_logout_sidebar():
+    """
+    Renderiza el botón de logout al final del sidebar (llamar al final de cada página)
+    """
+    # Spacer para empujar el contenido al final
+    st.sidebar.markdown("")
     st.sidebar.markdown("---")
-    st.sidebar.markdown("### 👤 Usuario")
     
     tipo_emoji = "🔑" if st.session_state.user_type == "privilegiado" else "👥"
     tipo_texto = "Privilegiado" if st.session_state.user_type == "privilegiado" else "General"
@@ -151,7 +161,7 @@ def pagina_login(usuarios: dict):
         st.markdown(
             """
             <div style="text-align: center; padding: 2rem 0;">
-                <h1 style="color: #9F2241;">⚖️ Dashboard Delitos CDMX</h1>
+                <h1 style="color: #9F2241;">Dashboard Delitos CDMX</h1>
                 <p style="font-size: 1.2rem; color: #666;">Sistema de Análisis de Criminalidad</p>
             </div>
             """,
@@ -198,8 +208,4 @@ def pagina_login(usuarios: dict):
             **Usuario Privilegiado:**
             - Usuario: `admin`
             - Contraseña: `admin123`
-            
-            **Usuario Estándar:**
-            - Usuario: `usuario`
-            - Contraseña: `usuario123`
             """)

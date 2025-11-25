@@ -139,3 +139,6 @@ else:
     st.markdown("##### Distribución Temporal (Reloj de 24 horas)")
     chart_polar = plot_utils.plot_polar_violencia_hora(data_completo_filtered)
     st.altair_chart(chart_polar, use_container_width=True)
+
+# Botón de cerrar sesión al final del sidebar
+auth_utils.renderizar_logout_sidebar()

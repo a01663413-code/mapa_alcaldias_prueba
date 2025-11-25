@@ -51,8 +51,5 @@ else:
         "📈 Análisis": [pagina_analisis, pagina_mapa]
     })
 
-# Mostrar información del usuario en el sidebar
-auth_utils.mostrar_info_usuario_sidebar()
-
 # Ejecutar la navegación
 pg.run()

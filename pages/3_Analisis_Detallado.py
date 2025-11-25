@@ -48,3 +48,6 @@ with st.expander("📊 Vista Previa de Funcionalidades Futuras"):
     - **Dashboard Personalizado**: Configuración de métricas y alertas
     - **Exportación de Reportes**: Generación de informes en PDF/Excel
     """)
+
+# Botón de cerrar sesión al final del sidebar
+auth_utils.renderizar_logout_sidebar()

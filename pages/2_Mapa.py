@@ -193,3 +193,6 @@ with st.expander("ℹ️ Información técnica de esta vista"):
     
     **Nota sobre el mapa:** Si notas lentitud, reduce el porcentaje de "Densidad de puntos" en la barra lateral.
     """)
+
+# Botón de cerrar sesión al final del sidebar
+auth_utils.renderizar_logout_sidebar()
