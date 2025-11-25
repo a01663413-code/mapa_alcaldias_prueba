@@ -25,5 +25,4 @@ pg = st.navigation({
     "Menú Principal": [pagina_analisis, pagina_mapa]
 })
 
-# EJECUCIÓN
 pg.run()
