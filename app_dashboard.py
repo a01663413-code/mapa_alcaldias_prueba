@@ -14,7 +14,7 @@ st.set_page_config(
 # Aquí defines cuales son tus archivos reales y como quieres que se llamen en el menú
 # default=True hace que esta sea la página que se abre automáticamente al entrar
 pagina_analisis = st.Page(
-    "pages/1_Analisis_inicial.py", 
+    "pages/1_Analisis_Inicial.py", 
     title="Análisis Inicial", 
     icon="📋", 
     default=True
@@ -34,4 +34,5 @@ pg = st.navigation({
 
 # === Ejecución ===
 # Esto es lo que hace que se muestre el contenido de la página seleccionada
+
 pg.run()
