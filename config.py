@@ -27,3 +27,20 @@ COLORES_STACK = [
     "#691C32",  # Guinda
     "#10312B"   # Verde muy oscuro
 ]
+
+# === CONFIGURACIÓN DE USUARIOS Y AUTENTICACIÓN ===
+# Contraseñas almacenadas como hash SHA256
+# Para generar un hash: hashlib.sha256("tu_contraseña".encode()).hexdigest()
+
+USUARIOS = {
+    "admin": {
+        "password_hash": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",  # admin123
+        "tipo": "privilegiado",
+        "nombre_completo": "Administrador"
+    },
+    "usuario": {
+        "password_hash": "dfa7a2273567dcd1efffb9a46308e91c20fa13c44c3441bc69cd6a7869b3f7fd",  # usuario123
+        "tipo": "privilegiado",
+        "nombre_completo": "Usuario Estándar"
+    }
+}

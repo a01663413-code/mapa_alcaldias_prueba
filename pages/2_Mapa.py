@@ -4,6 +4,7 @@ import data_loader   # Módulo local de carga de datos
 import map_utils     # Módulo local de utilidades de mapa
 import plot_utils    # Módulo local de visualizaciones (Altair)
 import numpy as np
+import auth_utils
 
 # === 1. Configuración de la Página ===
 # Nota: Si usas st.navigation en el archivo principal, esta config es opcional pero recomendada para títulos de pestaña.
@@ -12,6 +13,9 @@ st.set_page_config(
     page_icon="🗺️",
     layout="wide"
 )
+
+# Control de acceso: requiere autenticación (todos los tipos de usuario)
+auth_utils.requiere_autenticacion()
 
 # === 2. Carga de Datos ===
 URL_GEOJSON_ALCALDIAS = "https://datos.cdmx.gob.mx/dataset/alcaldias/resource/8648431b-4f34-4f1a-a4b1-19142f944300/download/limite-de-las-alcaldias.json"

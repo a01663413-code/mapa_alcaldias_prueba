@@ -1,6 +1,7 @@
 import streamlit as st
 import data_loader
 import plot_utils
+import auth_utils
 
 # === 1. Configuración de la Página ===
 st.set_page_config(
@@ -8,6 +9,9 @@ st.set_page_config(
     page_icon="📋",
     layout="wide"
 )
+
+# Control de acceso: requiere autenticación (todos los tipos de usuario)
+auth_utils.requiere_autenticacion()
 
 # === 2. Carga de Datos ===
 data = data_loader.load_data("df_streamlit.csv") 
